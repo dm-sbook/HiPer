@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<EntitiesScript Name="HiPER">
+        <Attributes>
+                <Attribute Name="FirstName" Tag="FN"/>
+                <Attribute Name="MiddleName" Tag="MN"/>
+                <Attribute Name="LastName" Tag="LN"/>
+                <Attribute Name="PrevName" Tag="PN"/>
+                <Attribute Name="Suffix" Tag="SX"/>
+                <Attribute Name="DOB" Tag="BD"/>
+                <Attribute Name="SSN" Tag="SS"/>
+                <Attribute Name="RACE" Tag="RC"/>
+                <Attribute Name="Gender" Tag="GD"/>
+                <Attribute Name="AddrCity" Tag="AC"/>
+                <Attribute Name="AddrState" Tag="AS"/>
+                <Attribute Name="AddrZip" Tag="AZ"/>
+                <Attribute Name="BirthOrder" Tag="BI"/>
+                <Attribute Name="@RefID" Tag="RE"/>
+                <Attribute Name="NameTransCheck" Tag="NT"/>
+                <Attribute Name="AddrLine2" Tag="A2"/>
+                <Attribute Name="NormalizedName" Tag="NN"/>
+                <Attribute Name="CleanFirstName" Tag="CF"/>
+                <Attribute Name="CleanLastName" Tag="CL"/>
+                <Attribute Name="LastName1" Tag="L1"/>
+                <Attribute Name="LastName2" Tag="L2"/>
+        </Attributes>
+                        <Groups>
+                <Group Name="TransposedName" Tag="TN">
+                        <Member Name="FirstName" Delimiter="|"/>
+                        <Member Name="MiddleName" Delimiter="|"/>
+                        <Member Name="LastName" Delimiter="|"/>
+                </Group>
+                <Group Name="FullAddress" Tag="FA">
+                        <Member Name="AddrLine2" Delimiter="|"/>
+                        <Member Name="AddrZip" Delimiter="|"/>
+        </Group>
+                <Group Name="FullStreet" Tag="FS">
+                        <Member Name="@USAD_SNO" Delimiter=" "/>
+                        <Member Name="@USAD_SNM" Delimiter=""/>
+                </Group>
+        </Groups>
+    <Entity Name="Person" ClosureType="PostResolution" ClosureKey="RefID" ClosureAlgo="Edge">
+                <Blocking>
+                        <MatchKey Ident="1">
+                                <Segment Item="SSN" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="2">
+                                <Segment Item="NormalizedName" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="DOB" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="2.1">
+                                <Segment Item="NameTransCheck" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="DOB" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="2.2">
+                                <Segment Item="LastName1" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="DOB" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="2.3">
+                                <Segment Item="LastName2" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="DOB" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="3">
+                                <Segment Item="NameTransCheck" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrLine2" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="3.11">
+                                <Segment Item="LastName1" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrLine2" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrZip" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="3.12">
+                                <Segment Item="LastName2" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrLine2" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrZip" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="3.2">
+                                <Segment Item="NormalizedName" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="LastName1" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrZip" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                        <MatchKey Ident="3.3">
+                                <Segment Item="NormalizedName" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="LastName2" Hash="Scan(LR,LETTER,0,ToUpper,SameOrder)"/>
+                                <Segment Item="AddrZip" Hash="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </MatchKey>
+                </Blocking>
+                <ERAlgorithm Name="OnePass">
+                <BooleanRules>
+						<Rule Ident="1.0">
+                                <Term Item="NormalizedName" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.65)"/>
+                                <Term Item="LastName1" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.65)"/>
+                                <Term Item="DOB" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.65)"/>
+                        </Rule>
+						<Rule Ident="2.0">
+                                <Term Item="SSN" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.75)"/>
+                                <Term Item="DOB" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.75)"/>
+                        </Rule>
+						<Rule Ident="3.0">
+						        <Term Item="NameTransCheck" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+                                <Term Item="DOB" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+                        </Rule>
+						<Rule Ident="4.0">
+                                <Term Item="NormalizedName" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+                                <Term Item="SSN" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+                        </Rule>
+						<Rule Ident="5.0">
+                                <Term Item="NormalizedName" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.65)"/>
+                                <Term Item="DOB" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.65)"/>
+								<Term Item="AddrLine2" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.65)"/>
+								<Term Item="AddrZip" Similarity="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </Rule>
+						<Rule Ident="6.0">
+                                <Term Item="NormalizedName" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+                                <Term Item="LastName1" DataPrep="Scan(LR,LETTER,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+								<Term Item="AddrLine2" DataPrep="Scan(LR,DIGIT,0,ToUpper,SameOrder)" Similarity="LED(0.85)"/>
+								<Term Item="AddrZip" Similarity="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+								<Term Item="Suffix" Similarity="Scan(LR,DIGIT,0,ToUpper,SameOrder)"/>
+                        </Rule>
+                </BooleanRules>
+                </ERAlgorithm>
+        </Entity>
+</EntitiesScript>
